@@ -1,39 +1,52 @@
-# Moshi-Pilot — 2-Minute Demo Video Script & Storyboard
+# Moshi-Pilot — Demo Video Storyboard (Speakerphone Voice Agent)
 
-**Total length:** ~2:00  
-**Format:** Screen recording of `https://moshi-pilot.vercel.app` + voiceover narration (Loom, OBS, or QuickTime)  
-**Tone:** Confident, concise, focused on the human-in-the-loop trust guarantee and the five partner technologies  
-**Built for:** Side Quest Hotline Vapi Hackathon @ Vapi HQ  
+**Length:** ~120 seconds | **Audio:** English narration + light background music | **Visuals:** real mobile app recordings
 
 ---
 
-## Shot-by-Shot Timeline
+## Scene 0 — The Seedance Cinematic Hook (0:00–0:10)
 
-| Time | Scene | On-Screen Action | Voiceover (read aloud) | Visual Callout |
-|---|---|---|---|---|
-| **0:00–0:15** | Hook & Problem | Show dashboard landing page, zoom on tagline | *"Traveling in Japan is incredible until you need to make a phone call. Traditional ryokans, omakase counters, luggage services, and clinics still only confirm changes by phone — and only in Japanese. Translation apps can't bridge a phone call, and fully autonomous voice bots are too risky when a five-hundred-dollar dinner is on the line."* | Highlight tagline + problem |
-| **0:15–0:30** | Solution & Setup | Hover the scenario switcher → select "Kyoto Ryokan — Late Check-In", point to the Exa grounding panel | *"Meet Moshi-Pilot: a bilingual voice copilot that calls Japanese businesses in fluent, polite Keigo while you steer in English. Here we're letting Kyoto Hatago Ryokan know our party will arrive late at 9:30 PM. Before we even dial, Exa has automatically grounded the agent with the ryokan's hours and its strict 8:00 PM dinner policy."* | Exa grounding card |
-| **0:30–0:50** | The Call Begins | Click "Dial venue with Moshi-Pilot", watch the live waveform and bilingual transcript stream | *"We hit dial. Vapi places an outbound SIP call, and the receptionist answers in Japanese. Deepgram's nova-2 transcribes it in real time, and Moshi-Pilot politely introduces the guest in honorific Japanese, asking for a 9:30 PM check-in."* | Live waveform + transcript |
-| **0:50–1:15** | The Curveball & HITL | Hotel responds with the dinner cutoff; filler turn fires; decision card appears | *"The hotel agrees to the late check-in — but there's a catch: dinner service strictly ends at 8:00 PM. An autonomous bot would have to guess whether to forfeit a prepaid kaiseki dinner. Instead, TypeSafe/Jev detects a high-stakes branching policy, the agent buys time with polite Japanese filler, and pushes a translated one-tap decision card to our screen."* | Filler pill + decision card modal |
-| **1:15–1:35** | Decision + Whisper | Tap "[Cancel dinner, keep room]", then type a quick English whisper in the input bar | *"We tap 'Cancel dinner, keep room' — and while the call is live, we whisper an extra instruction in English: 'Ask if they can hold our bags tomorrow.' The agent weaves it seamlessly into its next Japanese sentence, the hotel confirms, and the call wraps up."* | Whisper bubble + Keigo confirmation |
-| **1:35–1:55** | Receipt & Partner Stack | Show Manus confirmation receipt panel + partner widget | *"The moment we hang up, Manus compiles the verified transcript into a structured itinerary update and dispatches the receipt by email and SMS — who we spoke with, agreed terms, and new arrival windows. Every call runs through all five partners: Vapi for voice, Deepgram for transcription, TypeSafe/Jev for decisions, Exa for search, and Manus for automation."* | Manus receipt + partner chips |
-| **1:55–2:00** | Close | Final tagline screen | *"Moshi-Pilot: speak fluent Keigo over the phone — without speaking a word of Japanese. Try it live at moshi-pilot.vercel.app. Thank you."* | Logo + live demo URL |
+- **Visual:** A nervous American traveler stands outside a rain-slicked Kyoto ryokan at night, holding his phone in confusion. A glowing origami crane emerges from the phone and unfolds into a bilingual speech wave between the two worlds.
+- **Narration:** *"Every year, millions of travelers stand outside Japanese hotels, ryokans, and restaurants — needing to talk, but unable to speak a single word of polite Japanese."*
 
 ---
 
-## Recording Tips
+## Scene 1 — The Problem & the Setup (0:10–0:25)
 
-1. **Resolution & layout:** Record at 1920×1080, browser maximized at 100% zoom on a desktop layout (left grounding / center console / right receipt).
-2. **Audio:** Use a decent external microphone; the transcript text does the heavy lifting, but clear narration sells the demo.
-3. **Pacing:** Practice reading the script once before recording — 130–140 words per minute lands you almost exactly at 1:55.
-4. **Auto-pilot option:** Click **"Stage Demo (90s)"** in the header — the entire flow (dial → hotel → filler → decision → whisper → receipt) runs itself on a realistic timer so you can focus 100% on narrating.
-5. **If live Vapi audio is connected:** switch the call audio to speakerphone so the Japanese voice is audible in the recording (this is always the most impressive part for judges).
-6. **Hosting:** Upload as unlisted on YouTube or share a Loom link in your submission.
+- **Visual:** Phone home screen of Moshi-Pilot. Camera zooms to the 3-step guidance banner: "1. Write call topic in English. 2. Call from your phone on speaker. 3. Tap Call via AI Agent."
+- **Narration:** *"Most AI calling products try to be a phone company. Moshi-Pilot doesn't. You make the call yourself — phone on speaker next to your laptop — and let Moshi-Pilot be the voice that drives the conversation."*
 
 ---
 
-## Key Talking Points for Judges
+## Scene 2 — Writing the Topic (0:25–0:40)
 
-- **Why HITL matters:** *"Autonomous voice agents guess; travel money is unforgiving. Deterministic escalation is the difference between a toy and a product you'd actually use with your family's vacation."*
-- **Why Keigo is a moat:** *"Polite honorific Japanese is hard even for native speakers — getting it right over the phone is the cultural trust key to Japanese hospitality."*
-- **Market:** *"36.9 million inbound visitors to Japan in 2024, with 8+ trillion yen spend — and the highest-margin experiences are precisely the phone-only ones."*
+- **Visual:** User writes the call topic: *"Notify venue that reservation will arrive late at 9:30 PM instead of 6:00 PM due to train delay. Hold our room."* Selects Japan (Keigo, polite), Hotel category.
+- **Narration:** *"You write what you want in plain English. Moshi-Pilot's stack includes five real APIs: Deepgram for multilingual speech recognition, Fish Audio for polite foreign-language speech, TypeSafe's Jev model for decision routing, gpt-5-mini for translation into authentic honorific registers, and LiveKit for real-time audio rooms."*
+
+---
+
+## Scene 3 — The Agent Takes the Call (0:40–1:05)
+
+- **Visual:** Taps "Call via AI Agent". Green status pill: "Speaking Japanese · Keigo (polite)". Animated waveform. The agent opens with fluent polite Keigo; the hotel replies in Japanese. Bilingual transcript renders in real time with kanji/kana, romaji, and English.
+- **Narration:** *"The agent introduces the reservation in proper Keigo. The hotel answers in Japanese — Deepgram transcribes under 300 milliseconds — and you read the conversation live in English, with romaji so you always know what's being said."*
+
+---
+
+## Scene 4 — The Decision: Polite Filler + One-Tap Card (1:05–1:30)
+
+- **Visual:** The hotel presents the curveball: *"Kaiseki dinner service ends strictly at 8 PM; shall we cancel dinner?"* TypeSafe / Jev evaluates the branch. The agent immediately plays the culturally authentic filler phrase: *"少々お待ちください。お客様にご確認いたしております。"* — "One moment please, I am confirming with the customer." A translated decision card pops up with confidence score. User taps "Cancel dinner, keep room".
+- **Narration:** *"Here is the most important screen in the product. Instead of dead air, Moshi-Pilot speaks a natural Japanese filler — buying time without awkward silence — while TypeSafe's decision engine pushes a translated multiple-choice card to your screen. The deterministic human-in-the-loop guarantee: the agent never commits to money, fees, or policy changes without your explicit tap."*
+
+---
+
+## Scene 5 — Whisper Steering & Receipt Close (1:30–1:55)
+
+- **Visual:** User types a quick English whisper mid-call ("ask if they can hold bags"); the agent weaves it into the next sentence. Taps "End call". Manus auto-compiles the transcript into a structured confirmation receipt with agreed points, updated schedule, and a copy button.
+- **Narration:** *"Mid-call, you steer with live English whispers. When you're done, a Manus automation turns the entire call into a structured itinerary receipt — agreed points, updated schedule, ready to paste into email or SMS."*
+
+---
+
+## Scene 6 — Outro (1:55–2:00)
+
+- **Visual:** Logo + "Moshi-Pilot — moshi-pilot.vercel.app · github.com/dev-ansung/moshi-pilot · Built for the Side Quest Hotline Vapi Hackathon @ Vapi HQ".
+- **Narration:** *"Moshi-Pilot. Your phone, your voice agent, your decisions. Available live at moshi-pilot.vercel.app."*
