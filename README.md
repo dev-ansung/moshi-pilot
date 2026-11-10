@@ -1,183 +1,208 @@
-# ☎️ Moshi-Pilot (もしパイロット)
+# Moshi-Pilot (もしパイロット)
 
-**Speak fluent Keigo over the phone — without speaking a word of Japanese.**
+**Bilingual Voice Co-pilot for Japan Travel** — speak fluent Keigo over the phone without speaking a word of Japanese.
 
-*A real-time, human-in-the-loop (HITL) bilingual voice concierge for travelers in Japan.*
+[![Live Demo](https://img.shields.io/badge/%F0%9F%8C%90%20Live%20Demo-moshi--pilot.vercel.app-18181b)](https://moshi-pilot.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-dev--ansung%2Fmoshi--pilot-000000?logo=github)](https://github.com/dev-ansung/moshi-pilot)
+[![Built for Side Quest Hotline](https://img.shields.io/badge/Side%20Quest%20Hotline-Vapi%20Hackathon%20%40%20Vapi%20HQ-6d28d9)](https://vapi.ai)
+[![License: MIT](https://img.shields.io/badge/License-MIT-zinc)](LICENSE)
 
-Built for the **Side Quest Hotline Vapi Hackathon @ Vapi HQ** ⚡
+<p align="center">
+  <img src="public/screenshots/hero_concept.png" alt="Moshi-Pilot — an American traveler outside a Kyoto ryokan, his phone call routed through a bilingual voice proxy" width="900" />
+</p>
 
-[![Live Demo](https://img.shields.io/badge/demo-moshi--pilot.vercel.app-000?style=for-the-badge&logo=vercel)](https://moshi-pilot.vercel.app)
-[![GitHub](https://img.shields.io/badge/github-dev--ansung%2Fmoshi--pilot-181717?style=for-the-badge&logo=github)](https://github.com/dev-ansung/moshi-pilot)
-
----
-
-## 🎯 The Pitch
-
-### The Problem
-
-Traveling in Japan is magical until you have to make a phone call.
-
-Many traditional **ryokans** (Japanese inns), boutique **omakase** sushi counters, local **luggage forwarding** services (Takkyubin), regional taxi fleets, and medical clinics still **only accept changes, confirmations, and inquiries over the phone — and only in Japanese**.
-
-For non-Japanese-speaking travelers, every existing option is broken:
-
-1. **Pass-the-phone translation apps** cannot be routed through a standard telephone call.
-2. **Hotel concierges and Japanese-speaking friends** are scarce, slow, and unavailable after hours.
-3. **Fully autonomous AI voice agents are too risky when real money is on the line.** If a hotel staff member says *"Late check-in voids your kaiseki dinner — should we cancel the meal or hold just the room?"*, you cannot trust an autonomous LLM to guess your preference on a $500 dinner.
-
-The result: **$200–$1,000+ lost per incident** in forfeited meals and no-shows, hours wasted hunting for bilingual help, and extreme stress during already tense moments like train delays or lost luggage.
-
-### The Solution
-
-**Moshi-Pilot** is a bilingual telephone copilot that dials Japanese businesses on your behalf, handles polite honorific Japanese (*Keigo*) conversation automatically, and **pauses to push instant, translated decision cards to your screen the exact moment a human choice is required**.
-
-You steer the call in **English** through one-tap buttons and live text; Moshi-Pilot speaks **natural, polite Japanese** on the line.
+> Built for the **Side Quest Hotline — Vapi Hackathon @ Vapi HQ** (November 2026).
+> Stack: **Vapi** (voice orchestration), **Deepgram nova-2** (Japanese STT), **TypeSafe / Jev** (deterministic HITL decision routing), **Exa** (neural pre-call web grounding), **Manus** (post-call itinerary workflow automation), **Vercel** (deployment).
 
 ---
 
-## ✨ Key Features
+## The Problem
 
-- 🗣️ **Polite Keigo Voice Proxy** — Conducts greetings, reservation lookups, and confirmations in culturally appropriate honorific Japanese without robotic pauses.
-- 🛑 **Deterministic HITL Escalation** — Distinguishes routine dialogue from high-stakes branching questions (fees, cancellations, policy clashes) using a structured decision router instead of LLM guesswork.
-- 📱 **Live 1-Tap Decision Cards** — When the business asks something only you can answer, the agent buys time with natural Japanese filler (*"少々お待ちください… / One moment please, let me double-check..."*) while pushing a translated multiple-choice card to your screen.
-- ⌨️ **Live English Whisper Steering** — Type custom instructions mid-call in English (e.g., *"Ask if they can hold our bags tomorrow"*), and the agent seamlessly weaves them into its next Japanese sentence.
-- 🔎 **Pre-Call Web Grounding** — Automatically fetches the venue's phone number, business hours, and cancellation rules with Exa before dialing so the agent never goes in blind.
-- 📄 **Post-Call Manus Receipt** — Dispatches a structured confirmation log (who you spoke with, agreed terms, updated itinerary) via email and SMS the moment you hang up.
-- 🎬 **90-Second Stage Demo Mode** — A scripted, reproducible demo flow designed for live presentations and recorded pitches.
+Every year, 36 million people travel to Japan — and the vast majority do not speak Japanese. Japan's hospitality culture is famously phone-first: ryokans, high-end omakase restaurants, and courier services expect verbal negotiation in polite **Keigo** (敬語). When a train delay makes you miss dinner service, you have three bad options: say nothing and lose a $400 kaiseki meal, ask your concierge if you have one, or make an incomprehensible phone call.
+
+**Moshi-Pilot solves this.** You define the traveler intent once in English. Moshi-Pilot grounds on the venue's public rules, places the call, speaks polite Keigo, and — the moment a commitment must be made — pauses the call politely, buys time with a natural Japanese filler, and pushes a translated decision card to your screen. One tap, the agent confirms in Keigo, the venue agrees, and a Manus automation compiles the entire call into a structured itinerary receipt.
 
 ---
 
-## 🛠️ Partner Stack & Architecture
+## Demo Video (2 minutes)
 
-We built Moshi-Pilot by combining best-in-class real-time voice, search, and decision infrastructure:
+The demo below is a **real end-to-end recording of the live product** — hero showcase, scenario switcher, Exa grounding, the live bilingual call with streaming transcription, the HITL decision card popup, human response, live whisper steering, and the Manus post-call receipt.
 
-| Partner | Role in Moshi-Pilot |
-|---|---|
-| **☎️ Vapi** | Core voice orchestration, outbound SIP telephony, barge-in handling, and real-time filler injection. |
-| **🎙️ Deepgram** | Ultra-low-latency Japanese STT (`nova-2` multilingual) streaming transcribed hotel speech in under 300 ms. |
-| **⚡ TypeSafe / Jev** | Structured decision engine. Evaluates every incoming Japanese turn in milliseconds to route between `AUTO_REPLY` and `ESCALATE_TO_USER` with strict JSON schemas. |
-| **🔎 Exa** | Neural web search to fetch venue details, check-in rules, and cancellation policies before dialing. |
-| **🖐️ Manus** | Post-call workflow automation — compiling verified call transcripts into clean itinerary updates and dispatching receipts. |
+<p align="center">
+  <img src="public/demo_preview.gif" alt="Moshi-Pilot live call demo — bilingual transcript streaming with real-time romaji and English translations" width="800" />
+</p>
 
-### System Flow
+<p align="center">
+  <strong><a href="public/moshi_pilot_demo.mp4">&#x25B6; Watch the full 2-minute demo video (1080p, narrated)</a></strong>
+  &nbsp;|&nbsp;
+  <a href="public/moshi_pilot_demo_preview.mp4">Compressed preview (10s)</a>
+</p>
 
-```text
-               Traveler Web UI (English)
-                    │        ▲
-     1. "Late check-in       │  3. Pushes 1-tap decision card:
-        @ 9:30 PM"           │     [ Cancel dinner ]  [ Rush by 7:45 ]
-                    ▼        │
-      [Vapi Outbound SIP Call] ◄───► [Deepgram JP STT] ◄───► [Hotel Staff (Japanese)]
-                    │
-       2. Hotel: "Check-in OK, but dinner ends at 8 PM. Cancel dinner?"
-                    ▼
-          [TypeSafe / Jev Router]
-                    │
-            ──► Detects high-stakes branching decision!
-            ──► Agent speaks polite Japanese filler: "少々お待ちください…"
-            ──► Traveler taps [Cancel dinner, keep room]
-                    ▼
-          [Moshi-Pilot Agent] speaks polite Keigo confirmation & closes call
-                    ▼
-          [Manus Workflow] sends verified confirmation receipt (email/SMS)
+Narration storyboard and scene timings live in [docs/demo_video_script.md](docs/demo_video_script.md).
+
+---
+
+## Screenshots
+
+### 1. The Command Center
+<p align="center"><img src="public/screenshots/01_dashboard.png" alt="Moshi-Pilot landing console with scenario switcher, Exa pre-call grounding, and partner stack" width="900" /></p>
+
+*Scenario presets for real travel friction (late check-in, dietary restrictions, luggage reroute), Exa-grounded venue facts, and one-click demo flow.*
+
+### 2. Live Bilingual Call with Keigo
+<p align="center"><img src="public/screenshots/02_live_call_keigo.png" alt="Live Japanese transcript with romaji and English translation" width="900" /></p>
+
+*Deepgram nova-2 transcribes Japanese under 300 ms; each turn shows kanji/kana, romaji, and English translation with speaker labels.*
+
+### 3. The Human-in-the-Loop Decision Card
+<p align="center"><img src="public/screenshots/03_hitl_decision_card.png" alt="Translated multiple-choice decision card modal" width="900" /></p>
+
+*The venue's curveball translated into English multiple-choice. While you decide, Moshi-Pilot says polite filler phrases (少々お待ちください…) so the hotel staff never hears awkward silence.*
+
+### 4. Post-Call Confirmation Receipt
+<p align="center"><img src="public/screenshots/04_manus_receipt.png" alt="Manus confirmation receipt with updated itinerary and agreed points" width="900" /></p>
+
+*Manus auto-compiles the transcript into a structured itinerary update — agreed points, updated schedule, agent summary — copyable in one click and dispatchable to email/SMS.*
+
+---
+
+## How It Works
+
+```
+                        Traveler intent (English)
+                                   │
+                                   ▼
+             [Exa] Neural pre-call grounding of venue rules
+                                   │
+                                   ▼
+          [Vapi] Outbound SIP call  ◄──►  Hotel staff (Japanese)
+                                   │
+                                   ▼
+               [Deepgram nova-2] Japanese STT <300ms
+                                   │
+                         Bilingual translation
+                                   │
+                ┌──────────────────┴──────────────────┐
+                │                                     │
+         Normal turn                         Branching decision?
+                │                                     │
+          Agent Keigo                        [TypeSafe / Jev]
+            reply                               router: confidence,
+                │                              escalation schema
+                │                                     │
+                │                                     ▼
+                │                            Polite Japanese filler
+                │                            ("少々お待ちください…")
+                │                                     │
+                │                            HITL decision card
+                │                            pushed to screen
+                │                                     │
+                │                               Human tap
+                │                                     │
+                └──────────────────┬──────────────────┘
+                                   │
+                                   ▼
+                        Agent Keigo confirmation
+                                   │
+                                   ▼
+             [Manus] Post-call itinerary workflow automation
+             (receipt, itinerary diff, email/SMS dispatch)
 ```
 
----
-
-## 🎬 90-Second Live Demo Script
-
-1. **Setup (0:00–0:15):** On the Moshi-Pilot dashboard, select **"Kyoto Ryokan — Late Check-In"** (Reservation #402, new arrival 9:30 PM). **Exa** auto-populates the ryokan's hours and the strict 8:00 PM dinner cutoff.
-2. **The Call Begins (0:15–0:35):** Click **"Dial venue with Moshi-Pilot"**. **Vapi** places a live outbound SIP call on speakerphone. The front desk answers in Japanese; Moshi-Pilot politely introduces the guest and states the 9:30 PM arrival.
-3. **The Curveball (0:35–0:55):** The receptionist replies in Japanese that dinner service strictly ends at 8:00 PM and asks how the guest wants to proceed.
-4. **The HITL Magic (0:55–1:15):** **Jev** catches the policy conflict. Moshi-Pilot automatically asks the hotel to hold a moment in polite Japanese, while a translated decision card appears on screen: *[Cancel dinner, keep room]* vs. *[I'll rush to arrive by 7:45 PM]*. We tap **Cancel dinner** and type a whisper: *"Ask if they can hold our bags tomorrow."*
-5. **Resolution (1:15–1:30):** Moshi-Pilot immediately relays both the decision and the baggage question in fluent Keigo, receives confirmation, thanks the host, and **Manus** dispatches the structured itinerary receipt.
+**The deterministic HITL guarantee:** Moshi-Pilot *never* commits to financial or policy changes without your explicit screen tap. The agent can negotiate, clarify, and persuade — but the traveler holds the final say.
 
 ---
 
-## 💻 Tech Stack
+## Three Scenarios, One Engine
+
+| Scenario | Traveler intent | Curveball | Resolution |
+|----------|-----------------|-----------|------------|
+| **Kyoto Ryokan — Late Check-In** | Train delay pushes check-in from 6 PM to 9:30 PM | Kaiseki dinner ends strictly at 8 PM | Human picks "Cancel dinner, keep room" — no fees, room held to 9:30 PM |
+| **Ginza Omakase — Dietary Preference** | 2 guests at 7 PM want to confirm pescatarian accommodation | Restaurant needs 48-hour advance notice | Human picks chef's flexible alternative or reschedules |
+| **Yamato Takkyubin — Luggage Reroute** | Forward bags (track #TK-88341) to Tokyo hotel | Delivery address change must be confirmed by sender | Human confirms address, agent speaks tracking details in Keigo |
+
+Each scenario carries pre-grounded Exa data (hours, phone, cancellation rules, front-desk notes), authentic bilingual dialogue trees, TypeSafe/Jev decision cards, and Manus receipts.
+
+---
+
+## Partner Technology
+
+| Partner | Role in Moshi-Pilot |
+|---------|---------------------|
+| **Vapi** | Outbound SIP telephony, voice agent orchestration, barge-in detection, and real-time filler speech delivery |
+| **Deepgram** | nova-2 Japanese STT with <300 ms latency so live translation stays conversational |
+| **TypeSafe / Jev** | Deterministic decision routing with strongly-typed escalation schemas; confidence scoring decides what requires human eyes |
+| **Exa** | Neural pre-call web grounding — venues' public hours, policies, and phone numbers are verified before dialing |
+| **Manus** | Post-call itinerary workflow automation: transcript → structured receipt → booking app/calendar/SMS dispatch |
+| **Vercel** | Edge hosting with instant deployments from `git push main` |
+
+---
+
+## Key Differentiators
+
+1. **Polite fillers, not silence.** Most agents go mute while deciding. Moshi-Pilot speaks natural Japanese filler phrases (*「少々お待ちください。お客様にご確認いたしております。」*) — culturally fluent and confidence-preserving.
+2. **Live whisper steering.** Type instructions in English mid-call; they're woven into the agent's next Japanese sentence.
+3. **Receipt-first close.** Every call ends with a structured itinerary diff, not a transcript dump.
+4. **Offline-safe demo mode.** The full conversation flow runs locally with simulated waveforms and deterministic branching — stage-safe on unstable hackathon Wi-Fi, zero API keys required for presentation.
+
+---
+
+## Tech Stack
 
 - **Framework:** Next.js 15 (App Router), React 19, TypeScript
-- **Styling:** Tailwind CSS, shadcn-style monochrome design system
+- **Styling:** Tailwind CSS v4, shadcn-inspired monochrome design system
 - **Icons:** Lucide React
-- **Voice & Telephony:** Vapi Web SDK + Server REST API
-- **Transcription:** Deepgram `nova-2` multilingual STT
-- **Decision Engine:** TypeSafe / Jev structured JSON routers
-- **Search & Grounding:** Exa API
-- **Automation:** Manus API & webhooks
+- **Voice / STT / Orchestration:** Vapi, Deepgram nova-2
+- **Decision Engine:** TypeSafe / Jev escalation schemas
+- **Grounding & Workflow:** Exa (web grounding), Manus (workflow automation)
 - **Deployment:** Vercel
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- npm or pnpm
-- (Optional for live calls) API keys for Vapi, Deepgram, TypeSafe/Jev, Exa, Manus — **demo mode works out of the box without any keys**
-
-### Installation
+## Getting Started
 
 ```bash
-# Clone the repository
 git clone https://github.com/dev-ansung/moshi-pilot.git
 cd moshi-pilot
-
-# Install dependencies
 npm install
-
-# Run the development server
 npm run dev
+# open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to launch the Traveler Co-Pilot console.
+### With real partner credentials
 
-### Environment Variables (optional, for live mode)
+Copy `.env.example` to `.env.local` and fill in:
 
-Copy `.env.example` to `.env.local` and fill in your keys:
-
-```bash
-VAPI_API_KEY=your_vapi_key
-VAPI_PHONE_NUMBER_ID=your_vapi_phone_number_id
-DEEPGRAM_API_KEY=your_deepgram_api_key
-TYPESAFE_JEV_API_KEY=your_jev_api_key
-EXA_API_KEY=your_exa_api_key
-MANUS_API_KEY=your_manus_api_key
+```env
+VAPI_API_KEY=vapi_live_xxx
+VAPI_ASSISTANT_ID=xxx
+DEEPGRAM_API_KEY=xxx
+EXA_API_KEY=xxx
+MANUS_API_KEY=xxx
 ```
 
-Keys can also be entered at runtime via the **API Keys** button in the app header (stored in your browser only).
+Without keys the app runs its built-in simulation mode — every scenario, decision card, and receipt works out of the box.
 
 ---
 
-## 📊 Why This Wins
+## Security
 
-- **Massive market with proven willingness to pay:** 36.9 million inbound visitors to Japan in 2024 (8+ trillion yen spend); the highest-margin experiences (luxury ryokans, Michelin-starred omakase) are precisely the phone-only ones.
-- **Genuine technical wedge:** Keigo honorific Japanese is famously difficult even for native speakers; bilingual sub-second HITL phone orchestration is technically defensible and hard to replicate.
-- **Trust architecture:** The deterministic decision router means travelers never worry about autonomous mistakes with money or reservations — the single biggest barrier to AI voice adoption in travel.
-- **All five partner technologies are genuinely used** in the critical path of every call: Vapi (voice), Deepgram (STT), TypeSafe/Jev (decisions), Exa (grounding), Manus (receipts).
-
----
-
-## 🔮 Roadmap
-
-- [x] Bilingual Keigo voice proxy with HITL decision cards
-- [x] Exa pre-call venue grounding
-- [x] English whisper steering mid-call
-- [x] Manus post-call itinerary receipts
-- [ ] Inbound call forwarding (hotel calls you back)
-- [ ] Emergency escalation to human concierge
-- [ ] Expansion to Korea (존댓말) and France (vous)
-- [ ] Calendar & OTA sync (Booking.com, Agoda)
-- [ ] WhatsApp / LINE receipt delivery
+- No API keys are tracked in this repository (`.env*` is gitignored)
+- Real credentials live in `.env.local` or the in-app API Keys modal (stored in `localStorage` in the browser only)
+- Token revocation and key rotation documented in `SECURITY.md`
 
 ---
 
-## 👥 Team
+## Links
 
-Built with ❤️ at **Side Quest Hotline Vapi Hackathon @ Vapi HQ** by **dev-ansung** and the Moshi-Pilot team.
+- **Live app:** [moshi-pilot.vercel.app](https://moshi-pilot.vercel.app)
+- **GitHub:** [github.com/dev-ansung/moshi-pilot](https://github.com/dev-ansung/moshi-pilot)
+- **Demo video:** [public/moshi_pilot_demo.mp4](public/moshi_pilot_demo.mp4) · [preview GIF](public/demo_preview.gif)
+- **Storyboard:** [docs/demo_video_script.md](docs/demo_video_script.md)
+- **Logos:** [assets/](public/assets/) (3 origami-inspired concepts)
 
 ---
 
-## 📄 License
+## License
 
-MIT © dev-ansung — see [LICENSE](LICENSE) for details.
+[MIT](LICENSE) © 2026 dev-ansung. Built for the Side Quest Hotline Vapi Hackathon @ Vapi HQ.

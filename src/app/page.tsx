@@ -76,7 +76,7 @@ export default function HomePage() {
               whisperSlot={
                 <WhisperBar
                   onSend={addWhisper}
-                  disabled={status !== "in_call" && status !== "escalating" && status !== "user_deciding"}
+                  disabled={status === "idle" || status === "failed" || status === "dialing"}
                 />
               }
             />

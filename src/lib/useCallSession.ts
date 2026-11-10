@@ -22,40 +22,45 @@ export function useCallSession() {
   const [selectedScenario, setSelectedScenario] = useState<Scenario>(SCENARIOS[0]);
   const [status, setStatus] = useState<CallStatus>("idle");
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
-  const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
+  const [, setTurnRenderCounter] = useState(0);
+  const currentTurnRef = useRef(0);
   const [activeDecisionCard, setActiveDecisionCard] = useState<DecisionCard | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<ManusReceipt | null>(null);
   const [whispers, setWhispers] = useState<Whisper[]>([]);
   const [callDurationSeconds, setCallDurationSeconds] = useState(0);
+  const callDurationRef = useRef(0);
   const [isDemoAutoPlay, setIsDemoAutoPlay] = useState(false);
-  const [audioLevel, setAudioLevel] = useState(0); // 0-100 for live waveform
+  const [audioLevel, setAudioLevel] = useState(0);
 
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const stageDemoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scenarioRef = useRef(selectedScenario);
+  scenarioRef.current = selectedScenario;
 
   const reset = useCallback((newScenario?: Scenario) => {
     if (callTimerRef.current) clearInterval(callTimerRef.current);
     if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
-    if (stageDemoTimerRef.current) clearTimeout(stageDemoTimerRef.current);
     if (newScenario) setSelectedScenario(newScenario);
     setStatus("idle");
     setTurns([]);
-    setCurrentTurnIndex(0);
+    currentTurnRef.current = 0;
+    setTurnRenderCounter((c) => c + 1);
     setActiveDecisionCard(null);
     setSelectedOptionId(null);
     setReceipt(null);
     setWhispers([]);
+    callDurationRef.current = 0;
     setCallDurationSeconds(0);
     setIsDemoAutoPlay(false);
     setAudioLevel(0);
-  }, [selectedScenario]);
+  }, []);
 
   // Duration timer
   useEffect(() => {
     if (status === "dialing" || status === "in_call" || status === "escalating" || status === "user_deciding" || status === "agent_confirming") {
       callTimerRef.current = setInterval(() => {
+        callDurationRef.current += 1;
         setCallDurationSeconds((s) => s + 1);
       }, 1000);
     } else {
@@ -75,7 +80,7 @@ export function useCallSession() {
       return () => clearInterval(id);
     } else if (status === "user_deciding") {
       const id = setInterval(() => {
-        setAudioLevel(Math.floor(8 + Math.random() * 12)); // polite background silence
+        setAudioLevel(Math.floor(8 + Math.random() * 12));
       }, 300);
       return () => clearInterval(id);
     } else {
@@ -84,31 +89,28 @@ export function useCallSession() {
   }, [status]);
 
   const advanceOneTurn = useCallback(() => {
-    const timeline = selectedScenario.timeline;
-    if (currentTurnIndex >= timeline.turns.length) {
-      if (status !== "resolved") setStatus("resolved");
+    const sc = scenarioRef.current;
+    const timeline = sc.timeline;
+    const idx = currentTurnRef.current;
+    if (idx >= timeline.turns.length) {
+      setStatus("resolved");
       return;
     }
-    const nextTurn = timeline.turns[currentTurnIndex];
+    const nextTurn = timeline.turns[idx];
     setTurns((prev) => [...prev, nextTurn]);
-    const newIndex = currentTurnIndex + 1;
-    setCurrentTurnIndex(newIndex);
+    currentTurnRef.current = idx + 1;
+    setTurnRenderCounter((c) => c + 1);
 
-    if (currentTurnIndex === 0) {
-      setStatus("dialing");
-    } else if (currentTurnIndex === 1) {
-      setStatus("in_call");
-    }
+    if (idx === 0) setStatus("dialing");
+    else if (idx === 1) setStatus("in_call");
 
-    // Check if this turn triggers escalation
     if (nextTurn.isEscalationTrigger) {
       setStatus("escalating");
-      // polite filler injected automatically after 700ms
       setTimeout(() => {
         const filler: TranscriptTurn = {
           ...FILLER_TURN,
           id: "filler-" + Date.now(),
-          timestamp: formatSeconds(callDurationSeconds + 2),
+          timestamp: formatSeconds(callDurationRef.current + 2),
         };
         setTurns((prev) => [...prev, filler]);
         setTimeout(() => {
@@ -117,95 +119,97 @@ export function useCallSession() {
         }, 500);
       }, 700);
     }
-  }, [selectedScenario, currentTurnIndex, status, callDurationSeconds]);
+  }, []);
 
-  // Start call
+  // Start call - completely synchronous
   const startCall = useCallback(() => {
-    reset();
-    setTimeout(() => {
-      setStatus("dialing");
-      setTurns([selectedScenario.timeline.turns[0]]);
-      setCurrentTurnIndex(1);
-    }, 150);
-  }, [reset, selectedScenario]);
+    if (callTimerRef.current) clearInterval(callTimerRef.current);
+    if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
+    const sc = scenarioRef.current;
+    setTurns([sc.timeline.turns[0]]);
+    currentTurnRef.current = 1;
+    setTurnRenderCounter((c) => c + 1);
+    setStatus("dialing");
+    setActiveDecisionCard(null);
+    setSelectedOptionId(null);
+    setReceipt(null);
+    setWhispers([]);
+    callDurationRef.current = 0;
+    setCallDurationSeconds(0);
+  }, []);
 
   // Auto-play mode (natural pacing)
   useEffect(() => {
     if (!isDemoAutoPlay) return;
     if (status === "resolved") return;
-    if (status === "user_deciding") return; // waiting on human
-    const delay = currentTurnIndex === 0 ? 900 : currentTurnIndex === 1 ? 2600 : currentTurnIndex === 2 ? 3800 : 4200;
+    if (status === "user_deciding") return;
+    const idx = currentTurnRef.current;
+    const delay = idx === 1 ? 2600 : idx === 2 ? 3800 : idx === 3 ? 4200 : 4200;
     autoPlayTimerRef.current = setTimeout(() => {
       advanceOneTurn();
     }, delay);
     return () => {
       if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
     };
-  }, [isDemoAutoPlay, status, currentTurnIndex, advanceOneTurn]);
+  }, [isDemoAutoPlay, status, advanceOneTurn]);
 
   // Human answers the decision card
-  const answerDecision = useCallback(
-    (optionId: string) => {
-      if (!activeDecisionCard) return;
-      setSelectedOptionId(optionId);
-      setActiveDecisionCard(null);
-      setStatus("agent_confirming");
+  const answerDecision = useCallback((optionId: string) => {
+    if (!activeDecisionCard) return;
+    setSelectedOptionId(optionId);
+    setActiveDecisionCard(null);
+    setStatus("agent_confirming");
 
-      const res = selectedScenario.timeline.resolutionByOptionId[optionId];
-      if (!res) return;
+    const res = scenarioRef.current.timeline.resolutionByOptionId[optionId];
+    if (!res) return;
 
-      const baseSec = callDurationSeconds;
-      const t1: TranscriptTurn = {
-        id: "confirm-" + Date.now(),
-        timestamp: formatSeconds(baseSec + 2),
-        speaker: "agent_jp",
-        speakerLabel: "Moshi-Pilot (Keigo)",
-        japaneseText: res.agentConfirmationJp,
-        englishText: res.agentConfirmationEn,
-      };
+    const baseSec = callDurationRef.current;
+    const t1: TranscriptTurn = {
+      id: "confirm-" + Date.now(),
+      timestamp: formatSeconds(baseSec + 2),
+      speaker: "agent_jp",
+      speakerLabel: "Moshi-Pilot (Keigo)",
+      japaneseText: res.agentConfirmationJp,
+      englishText: res.agentConfirmationEn,
+    };
 
-      const t2: TranscriptTurn = {
-        id: "ack-" + Date.now(),
-        timestamp: formatSeconds(baseSec + 7),
-        speaker: "hotel",
-        speakerLabel: selectedScenario.timeline.turns[1]?.speakerLabel || "Hotel Staff",
-        japaneseText: res.hotelFinalJp,
-        englishText: res.hotelFinalEn,
-      };
+    const t2: TranscriptTurn = {
+      id: "ack-" + Date.now(),
+      timestamp: formatSeconds(baseSec + 7),
+      speaker: "hotel",
+      speakerLabel: scenarioRef.current.timeline.turns[1]?.speakerLabel || "Hotel Staff",
+      japaneseText: res.hotelFinalJp,
+      englishText: res.hotelFinalEn,
+    };
 
-      setTurns((prev) => [...prev, t1]);
+    setTurns((prev) => [...prev, t1]);
+    setTimeout(() => {
+      setTurns((prev) => [...prev, t2]);
       setTimeout(() => {
-        setTurns((prev) => [...prev, t2]);
-        setTimeout(() => {
-          setStatus("resolved");
-          setReceipt(selectedScenario.receipt);
-        }, 800);
-      }, 1600);
-    },
-    [activeDecisionCard, selectedScenario, callDurationSeconds]
-  );
+        setStatus("resolved");
+        setReceipt(scenarioRef.current.receipt);
+      }, 800);
+    }, 1600);
+  }, [activeDecisionCard]);
 
   // Whisper steering input
-  const addWhisper = useCallback(
-    (text: string) => {
-      if (!text.trim()) return;
-      const w: Whisper = {
-        id: "w-" + Date.now(),
-        text: text.trim(),
-        time: formatSeconds(callDurationSeconds),
-      };
-      setWhispers((prev) => [w, ...prev]);
-      const turn: TranscriptTurn = {
-        id: "turn-whisper-" + Date.now(),
-        timestamp: formatSeconds(callDurationSeconds),
-        speaker: "whisper",
-        speakerLabel: "You (whisper steering)",
-        englishText: `"${w.text}"`,
-      };
-      setTurns((prev) => [...prev, turn]);
-    },
-    [callDurationSeconds]
-  );
+  const addWhisper = useCallback((text: string) => {
+    if (!text.trim()) return;
+    const w: Whisper = {
+      id: "w-" + Date.now(),
+      text: text.trim(),
+      time: formatSeconds(callDurationRef.current),
+    };
+    setWhispers((prev) => [w, ...prev]);
+    const turn: TranscriptTurn = {
+      id: "turn-whisper-" + Date.now(),
+      timestamp: formatSeconds(callDurationRef.current),
+      speaker: "whisper",
+      speakerLabel: "You (whisper steering)",
+      englishText: `"${w.text}"`,
+    };
+    setTurns((prev) => [...prev, turn]);
+  }, []);
 
   // 90-second hackathon stage demo (auto-picks option)
   const runStageDemo = useCallback(() => {
@@ -213,11 +217,7 @@ export function useCallSession() {
     setIsDemoAutoPlay(true);
     setTimeout(() => {
       startCall();
-    }, 300);
-    // when escalation arrives, automatically pick option after 3.2s
-    stageDemoTimerRef.current = setTimeout(() => {
-      // handled via effect watching status
-    }, 100);
+    }, 400);
   }, [reset, startCall]);
 
   useEffect(() => {
