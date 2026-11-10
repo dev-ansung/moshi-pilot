@@ -77,11 +77,35 @@ const DEMO_DECISION: DecisionCard = {
   confidence: 86,
 };
 
+const DEMO_RECEIPT: StructuredReceipt = {
+  venue: "Kyoto Hatago Ryokan",
+  reservationId: "402",
+  agreedPoints: [
+    "Late check-in confirmed: room held until 21:30 JST",
+    "Kaiseki dinner service ended at 20:00 — dinner cancelled with no fee",
+    "Room reservation kept as-is",
+    "Luggage storage after check-out tomorrow confirmed",
+  ],
+  updatedSchedule: [
+    { event: "Late check-in", time: "21:30 JST" },
+    { event: "Kaiseki dinner", time: "Cancelled (ended 20:00)" },
+    { event: "Luggage storage", time: "Post check-out tomorrow" },
+  ],
+  summary:
+    "Late check-in held to 21:30, kaiseki dinner cancelled without fees, room kept, luggage storage after check-out confirmed.",
+  followUps: [
+    "Arrive before 21:30 and mention reservation #402 at front desk",
+    "No dinner tonight — staff recommends local dining options upon arrival",
+  ],
+};
+
 export function useLiveCall(realMode: boolean) {
   const [country, setCountry] = useState<Country>(COUNTRIES[0]);
   const [customerName, setCustomerName] = useState("佐藤 (Satō)");
   const [reservationId, setReservationId] = useState("402");
-  const [goal, setGoal] = useState("Notify venue that reservation will arrive late at 9:30 PM instead of 6:00 PM due to train delay. Hold our room.");
+  const [goal, setGoal] = useState(
+    "Notify venue that reservation will arrive late at 9:30 PM instead of 6:00 PM due to train delay. Hold our room."
+  );
   const [phone, setPhone] = useState("+81 75-551-0000");
   const [status, setStatus] = useState<CallStatus>("idle");
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -100,6 +124,8 @@ export function useLiveCall(realMode: boolean) {
   const demoStepRef = useRef(0);
   const statusRef = useRef(status);
   statusRef.current = status;
+  const turnsRef = useRef<Turn[]>([]);
+  turnsRef.current = turns;
 
   useEffect(() => {
     durationRef.current = duration;
@@ -116,12 +142,15 @@ export function useLiveCall(realMode: boolean) {
     };
   }, [status]);
 
-  const addTurn = useCallback((turn: Omit<Turn, "id" | "timestamp"> & { timestamp?: string }) => {
-    setTurns((prev) => [
-      ...prev,
-      { id: `${Date.now()}-${Math.random()}`, timestamp: turn.timestamp || ts(), ...turn },
-    ]);
-  }, []);
+  const addTurn = useCallback(
+    (turn: Omit<Turn, "id" | "timestamp"> & { timestamp?: string }) => {
+      setTurns((prev) => [
+        ...prev,
+        { id: `${Date.now()}-${Math.random()}`, timestamp: turn.timestamp || ts(), ...turn },
+      ]);
+    },
+    []
+  );
 
   const startCall = useCallback(async () => {
     setError(null);
@@ -325,20 +354,13 @@ export function useLiveCall(realMode: boolean) {
               : "Understood. Safe travels.",
           translation: "Understood. Safe travels.",
         });
-        setStatus("resolved");
-        const res = (await compileReceipt({
-          turns,
-          destination: country.name,
-          scenario: { goal, phone, customerName, reservationId },
-        })) as { receipt?: StructuredReceipt };
-        if (res?.receipt) setReceipt(res.receipt);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to send response");
       } finally {
         setBusy(false);
       }
     },
-    [addTurn, country, goal, customerName, reservationId, phone, turns]
+    [addTurn, country, goal, customerName, reservationId]
   );
 
   const sendWhisper = useCallback(
@@ -381,15 +403,19 @@ export function useLiveCall(realMode: boolean) {
 
   const endCall = useCallback(async () => {
     setStatus("resolved");
+    if (!realMode) {
+      setReceipt(DEMO_RECEIPT);
+      return;
+    }
     try {
       const res = (await compileReceipt({
-        turns,
+        turns: turnsRef.current,
         destination: country.name,
         scenario: { goal, phone, customerName, reservationId },
       })) as { receipt?: StructuredReceipt };
       if (res?.receipt) setReceipt(res.receipt);
     } catch {}
-  }, [country.name, customerName, goal, phone, reservationId, turns]);
+  }, [country.name, customerName, goal, phone, realMode, reservationId]);
 
   const resetCall = useCallback(() => {
     setStatus("idle");
