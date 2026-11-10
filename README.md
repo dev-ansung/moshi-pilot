@@ -197,6 +197,8 @@ Without keys the app runs its built-in simulation mode — every scenario, decis
 
 - **Live app:** [moshi-pilot.vercel.app](https://moshi-pilot.vercel.app)
 - **GitHub:** [github.com/dev-ansung/moshi-pilot](https://github.com/dev-ansung/moshi-pilot)
+- **Submission copy:** [docs/submission_copy.md](docs/submission_copy.md)
+- **All artifacts:** [ARTIFACTS.md](ARTIFACTS.md)
 - **Demo video:** [public/moshi_pilot_demo.mp4](public/moshi_pilot_demo.mp4) · [preview GIF](public/demo_preview.gif)
 - **Storyboard:** [docs/demo_video_script.md](docs/demo_video_script.md)
 - **Logos:** [assets/](public/assets/) (3 origami-inspired concepts)
