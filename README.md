@@ -36,7 +36,7 @@ Moshi-Pilot is an **AI voice agent you run beside your phone**. No special telep
 1. **You speak English** — the LLM translates into culturally correct honorific speech and **Fish Audio** speaks it through your speakers so the hotel hears it.
 2. **The hotel replies in Japanese** — **Deepgram Nova-2** transcribes (<300 ms), the LLM translates into English, and the live bilingual transcript shows kanji/kana + romaji + English.
 3. **A policy conflict appears** — e.g. *"Kaiseki dinner service ends strictly at 8 PM; shall we cancel dinner?"*
-4. **TypeSafe / Jev evaluates the decision** and the agent plays a polite filler phrase (*"少々お待ちください…"* — *"One moment please, I am confirming with the customer"*) so there's never dead air.
+4. **TypeSafe / Jev evaluates the decision** and the agent plays a polite filler phrase (*"少々お待ちください。同行者と相談いたします。"* — *"One moment please, I will discuss with my travel companion"*) so there's never dead air.
 5. **A translated decision card pops up** with confidence score; one tap from you, nothing assumed.
 6. **Agent delivers your confirmed answer** in polite Keigo.
 7. **Manus compiles a structured receipt** with agreed points and updated schedule.

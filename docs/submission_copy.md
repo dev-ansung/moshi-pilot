@@ -72,7 +72,7 @@ Short versions:
 ## Features
 
 1. **Speakerphone-native voice agent** — write the topic in English, call from your phone on speaker, let the agent drive the call
-2. **Polite fillers during decisions** — culturally authentic "hold" phrases in the local language (*少々お待ちください…*)
+2. **Polite fillers during decisions** — culturally authentic "hold" phrases in the local language (*少々お待ちください。同行者と相談いたします。*)
 3. **Deterministic HITL guarantee** — decision cards with confidence scores; zero financial/policy commitments without your tap
 4. **Live bilingual transcript** — kanji/kana + romaji + English with speaker labels
 5. **Live whisper steering** — type in English mid-call; agent weaves it into the next sentence

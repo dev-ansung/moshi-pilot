@@ -17,6 +17,7 @@ function ts(): string {
 }
 
 // Demo dialogue: authentic Japan ryokan late check-in with real Keigo
+// The agent speaks FIRST-PERSON AS the customer ("I am Satō..."), never as a proxy.
 const DEMO_TURNS: Omit<Turn, "id">[] = [
   {
     speaker: "system",
@@ -34,11 +35,11 @@ const DEMO_TURNS: Omit<Turn, "id">[] = [
   },
   {
     speaker: "agent",
-    speakerLabel: "Moshi-Pilot (Keigo)",
-    text: "恐れ入ります。本日ご宿泊予定の予約番号402番、佐藤様についてお伺い申し上げます。新幹線の遅延により、到着時刻が午後9時30分頃になる見込みでございます。大変申し訳ございません。",
-    romaji: "Osore-irimasu, honjitsu go-shukuhaku yotei no yoyaku bangou 402-ban, Satou-sama ni tsuite o-ukagai moushiagemasu...",
+    speakerLabel: "Moshi-Pilot (as you)",
+    text: "恐れ入ります。本日宿泊予定の佐藤と申します。予約番号402番です。新幹線の遅延により、到着が午後9時30分頃になる見込みでございます。大変申し訳ございません。",
+    romaji: "Osore-irimasu, honjitsu shukuhaku yotei no Satou to moushimasu. Yoyaku bangou 402-ban desu...",
     translation:
-      "Excuse me, I am calling regarding reservation #402 under Mr./Ms. Satō for tonight. Due to a train delay, their arrival is expected around 9:30 PM. We sincerely apologize.",
+      "Excuse me, I am Satō, with reservation #402 for tonight. Due to a train delay, I expect to arrive around 9:30 PM. I sincerely apologize.",
     timestamp: "00:16",
   },
   {
@@ -48,7 +49,7 @@ const DEMO_TURNS: Omit<Turn, "id">[] = [
     romaji:
       "Kashikomarimashita. Tadaima no chekku-in de areba o-heya wa kakuho dekimasu ga, kaiseki no go-yuushoku wa...",
     translation:
-      "Understood. If you check in now the room is held, but kaiseki dinner service is strictly available until 8 PM and cannot be served after. How would you like to proceed?",
+      "Understood. The room is held, but kaiseki dinner service is strictly available until 8 PM and cannot be served after. How would you like to proceed?",
     timestamp: "00:32",
   },
 ];
@@ -78,7 +79,9 @@ const DEMO_DECISION: DecisionCard = {
 
 export function useLiveCall(realMode: boolean) {
   const [country, setCountry] = useState<Country>(COUNTRIES[0]);
-  const [goal, setGoal] = useState("Notify venue that reservation will arrive late at 9:30 PM instead of 6:00 PM due to train delay.");
+  const [customerName, setCustomerName] = useState("佐藤 (Satō)");
+  const [reservationId, setReservationId] = useState("402");
+  const [goal, setGoal] = useState("Notify venue that reservation will arrive late at 9:30 PM instead of 6:00 PM due to train delay. Hold our room.");
   const [phone, setPhone] = useState("+81 75-551-0000");
   const [status, setStatus] = useState<CallStatus>("idle");
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -102,7 +105,6 @@ export function useLiveCall(realMode: boolean) {
     durationRef.current = duration;
   }, [duration]);
 
-  // Duration timer
   useEffect(() => {
     if (status === "in_call" || status === "escalating" || status === "user_deciding") {
       timerRef.current = window.setInterval(() => setDuration((d) => d + 1), 1000);
@@ -121,7 +123,6 @@ export function useLiveCall(realMode: boolean) {
     ]);
   }, []);
 
-  // START CALL
   const startCall = useCallback(async () => {
     setError(null);
     setTurns([]);
@@ -133,7 +134,6 @@ export function useLiveCall(realMode: boolean) {
     setStatus("connecting");
 
     if (!realMode) {
-      // Demo mode: scripted realistic flow
       setTimeout(() => {
         addTurn(DEMO_TURNS[0]);
         setStatus("in_call");
@@ -141,7 +141,6 @@ export function useLiveCall(realMode: boolean) {
       return;
     }
 
-    // Real mode
     try {
       addTurn({
         speaker: "system",
@@ -150,7 +149,6 @@ export function useLiveCall(realMode: boolean) {
       });
       setStatus("in_call");
 
-      // Auto-greeting in the local polite form
       setBusy(true);
       const greetingPrompt = `You are a polite receptionist greeting incoming callers for a Japanese service (hotel/ryokan/restaurant). Speak one short, natural greeting sentence in ${country.langName} with polite ${country.formality}. Return ONLY the greeting.`;
       const greeting = await translateText({
@@ -178,7 +176,6 @@ export function useLiveCall(realMode: boolean) {
     }
   }, [addTurn, country, realMode]);
 
-  // MICROPHONE: records live audio, sends to Deepgram, then translates
   const startRecording = useCallback(async () => {
     setError(null);
     try {
@@ -227,7 +224,6 @@ export function useLiveCall(realMode: boolean) {
           translation,
         });
 
-        // Evaluate with TypeSafe Jev
         const dec = await evaluateDecision({
           transcript: `${transcript} (English: ${translation})`,
           lastTurn: transcript,
@@ -235,7 +231,6 @@ export function useLiveCall(realMode: boolean) {
         });
 
         if (dec.escalate) {
-          // Play polite filler while the human decides
           setStatus("escalating");
           addTurn({
             speaker: "agent",
@@ -270,7 +265,6 @@ export function useLiveCall(realMode: boolean) {
     mr.stop();
   }, [addTurn, country, goal]);
 
-  // Demo step-by-step driver (stage-safe)
   const advanceDemo = useCallback(async () => {
     const nextIdx = demoStepRef.current + 1;
     if (nextIdx >= DEMO_TURNS.length) {
@@ -279,13 +273,13 @@ export function useLiveCall(realMode: boolean) {
         addTurn({
           speaker: "agent",
           speakerLabel: "Moshi-Pilot (filler)",
-          text: "少々お待ちください。お客様にご確認いたしております。",
-          romaji: "Shoushou omachi kudasai. Okyaku-sama ni go-kakunin itashite orimasu.",
-          translation: "One moment please, I am confirming with the customer.",
+          text: "少々お待ちください。同行者と相談いたします。",
+          romaji: "Shoushou omachi kudasai. Doukousha to soudan itashimasu.",
+          translation: "One moment please, I will discuss with my travel companion.",
           isFiller: true,
         });
         try {
-          await speakText("少々お待ちください。確認いたします。");
+          await speakText("少々お待ちください。同行者と相談いたします。");
         } catch {}
         setTimeout(() => {
           setDecision(DEMO_DECISION);
@@ -299,7 +293,6 @@ export function useLiveCall(realMode: boolean) {
     addTurn(t);
   }, [addTurn]);
 
-  // Answer HITL decision card
   const answerDecision = useCallback(
     async (option: { id: string; label: string }) => {
       setDecision(null);
@@ -310,12 +303,12 @@ export function useLiveCall(realMode: boolean) {
           sourceLang: "English",
           targetLang: country.langName,
           formality: "polite",
-          context: goal,
+          context: `You are the customer speaking politely in the first person. Reservation context: ${goal}, name=${customerName}, reservation=${reservationId}. Deliver this decision to the staff.`,
           includeRomaji: country.code === "jp",
         });
         addTurn({
           speaker: "agent",
-          speakerLabel: `Moshi-Pilot (${country.formality})`,
+          speakerLabel: `Moshi-Pilot (as you)`,
           text: translation,
           romaji,
           translation: option.label,
@@ -336,7 +329,7 @@ export function useLiveCall(realMode: boolean) {
         const res = (await compileReceipt({
           turns,
           destination: country.name,
-          scenario: { goal, phone },
+          scenario: { goal, phone, customerName, reservationId },
         })) as { receipt?: StructuredReceipt };
         if (res?.receipt) setReceipt(res.receipt);
       } catch (e) {
@@ -345,10 +338,9 @@ export function useLiveCall(realMode: boolean) {
         setBusy(false);
       }
     },
-    [addTurn, country, goal, phone, turns]
+    [addTurn, country, goal, customerName, reservationId, phone, turns]
   );
 
-  // Whisper mid-call steering
   const sendWhisper = useCallback(
     async (text: string) => {
       if (!text.trim()) return;
@@ -365,12 +357,12 @@ export function useLiveCall(realMode: boolean) {
           sourceLang: "English",
           targetLang: country.langName,
           formality: "polite",
-          context: `Instruction from the customer mid-call: "${text}". Weave it naturally into the next sentence.`,
+          context: `Instruction from the customer mid-call: "${text}". You ARE the customer speaking politely in the first person. Weave it naturally into the next sentence.`,
           includeRomaji: country.code === "jp",
         });
         addTurn({
           speaker: "agent",
-          speakerLabel: `Moshi-Pilot (${country.formality})`,
+          speakerLabel: `Moshi-Pilot (as you)`,
           text: translation,
           romaji,
           translation: text,
@@ -393,11 +385,11 @@ export function useLiveCall(realMode: boolean) {
       const res = (await compileReceipt({
         turns,
         destination: country.name,
-        scenario: { goal, phone },
+        scenario: { goal, phone, customerName, reservationId },
       })) as { receipt?: StructuredReceipt };
       if (res?.receipt) setReceipt(res.receipt);
     } catch {}
-  }, [country.name, goal, phone, turns]);
+  }, [country.name, customerName, goal, phone, reservationId, turns]);
 
   const resetCall = useCallback(() => {
     setStatus("idle");
@@ -413,6 +405,10 @@ export function useLiveCall(realMode: boolean) {
   return {
     country,
     setCountry,
+    customerName,
+    setCustomerName,
+    reservationId,
+    setReservationId,
     goal,
     setGoal,
     phone,

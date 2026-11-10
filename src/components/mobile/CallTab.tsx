@@ -9,6 +9,10 @@ import { LiveCallView } from "./LiveCallView";
 interface Props {
   country: Country;
   onCountryChange: (c: Country) => void;
+  customerName: string;
+  onCustomerNameChange: (n: string) => void;
+  reservationId: string;
+  onReservationIdChange: (r: string) => void;
   goal: string;
   onGoalChange: (g: string) => void;
   phone: string;
@@ -64,6 +68,10 @@ const GOAL_PRESETS: { label: string; text: string; countryCode: string }[] = [
 export function CallTab({
   country,
   onCountryChange,
+  customerName,
+  onCustomerNameChange,
+  reservationId,
+  onReservationIdChange,
   goal,
   onGoalChange,
   phone,
@@ -120,6 +128,28 @@ export function CallTab({
 
   return (
     <div className="space-y-3">
+      {/* Speakerphone how-it-works guidance */}
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-1.5 text-xs font-mono">
+        <div className="flex items-center justify-between text-[10px] text-zinc-500 uppercase tracking-wider">
+          <span>Speakerphone setup</span>
+          <span className="text-zinc-600">no phone service needed</span>
+        </div>
+        <ol className="space-y-1 text-zinc-300">
+          <li className="flex gap-2">
+            <span className="text-zinc-500 font-semibold shrink-0">1.</span>
+            <span>Write your call topic below — the AI speaks <strong>as you</strong> in polite {country.langName}.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-zinc-500 font-semibold shrink-0">2.</span>
+            <span>Call the hotel from your phone — put it on speaker next to your laptop.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-zinc-500 font-semibold shrink-0">3.</span>
+            <span>Tap the button — it drives the call and pauses for your decisions with polite fillers.</span>
+          </li>
+        </ol>
+      </div>
+
       {/* Resolved banner */}
       {resolved && (
         <div className="rounded-2xl border border-emerald-800/60 bg-emerald-950/40 p-3 space-y-2">
@@ -201,13 +231,41 @@ export function CallTab({
         </div>
       </div>
 
+      {/* Who is calling */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+            Your name / party
+          </label>
+          <input
+            type="text"
+            value={customerName}
+            onChange={(e) => onCustomerNameChange(e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600"
+            placeholder="Satō / Smith"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+            Reservation #
+          </label>
+          <input
+            type="text"
+            value={reservationId}
+            onChange={(e) => onReservationIdChange(e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600"
+            placeholder="402"
+          />
+        </div>
+      </div>
+
       {/* Goal textarea + presets */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
-            What should the AI say? (English)
+            Call topic (English — the AI speaks this as you)
           </label>
-          <span className="text-[10px] text-zinc-500 font-mono">translated live</span>
+          <span className="text-[10px] text-zinc-500 font-mono">first person</span>
         </div>
         <textarea
           rows={3}
@@ -251,9 +309,11 @@ export function CallTab({
           Deterministic HITL guarantee
         </div>
         <p className="leading-relaxed">
-          The agent negotiates politely in {country.langName}, but a human-in-the-loop
-          decision card appears before any commitment to money, fees, or policy
-          changes. One tap from you; nothing is assumed.
+          The AI speaks AS YOU in polite {country.langName} (first person), but a
+          human-in-the-loop decision card appears before any commitment to money,
+          fees, or policy changes. During decisions it plays polite filler
+          phrases so the hotel never hears silence. One tap from you; nothing is
+          assumed.
         </p>
       </div>
 
@@ -265,7 +325,7 @@ export function CallTab({
         className="w-full py-4 rounded-2xl bg-white text-black text-sm font-mono font-bold hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-lg shadow-white/5 flex items-center justify-center gap-2"
       >
         <PhoneCall className="w-4 h-4" />
-        Call via AI Agent
+        Start voice agent (speaks as you)
       </button>
 
       <div className="text-[10px] font-mono text-center text-zinc-500">

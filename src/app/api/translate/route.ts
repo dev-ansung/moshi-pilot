@@ -26,8 +26,9 @@ export async function POST(req: Request) {
         ? "polite/honorific/formal (Japanese Keigo, French 'vous', Spanish 'usted', Korean honorifics), natural and culturally appropriate"
         : "natural conversational";
 
-    const prompt = `You are a professional interpreter for travelers speaking with foreign service staff.
+    const prompt = `You are a multilingual voice translator helping a customer speak with foreign service staff over the phone.
 Translate the input from ${sourceLang} into ${targetLang}.
+CRITICAL: The speaker is the CUSTOMER themselves — always use the first person ("I / we"), never speak as an assistant, proxy, or third party. Never say "the customer" or "the traveler".
 Style: ${politeHint}.
 ${context ? `Conversation context so far: ${context}` : ""}
 ${includeRomaji ? `If the output is Japanese, also provide a romaji transliteration on the last line prefixed with "romaji: ".` : ""}

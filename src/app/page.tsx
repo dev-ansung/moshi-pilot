@@ -53,28 +53,6 @@ export default function Home() {
           : undefined
       }
     >
-      {/* 3-step speakerphone guidance banner */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-1.5 text-xs font-mono">
-        <div className="flex items-center justify-between text-[10px] text-zinc-500 uppercase tracking-wider">
-          <span>How to use</span>
-          <span className="text-zinc-600">no extra telephony needed</span>
-        </div>
-        <ol className="space-y-1 text-zinc-300">
-          <li className="flex gap-2">
-            <span className="text-zinc-500 font-semibold shrink-0">1.</span>
-            <span>Write your call topic in English below.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-zinc-500 font-semibold shrink-0">2.</span>
-            <span>Call the hotel from your phone — put it on speaker next to your laptop.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-zinc-500 font-semibold shrink-0">3.</span>
-            <span>Tap <strong>Call via AI Agent</strong> — it speaks Keigo, listens, and pauses for your decisions with polite fillers.</span>
-          </li>
-        </ol>
-      </div>
-
       {/* Real API status chips */}
       <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 overflow-x-auto pb-1 scrollbar-none gap-2">
         <span className="shrink-0">Live stack:</span>
@@ -106,6 +84,10 @@ export default function Home() {
         <CallTab
           country={call.country}
           onCountryChange={call.setCountry}
+          customerName={call.customerName}
+          onCustomerNameChange={call.setCustomerName}
+          reservationId={call.reservationId}
+          onReservationIdChange={call.setReservationId}
           goal={call.goal}
           onGoalChange={call.setGoal}
           phone={call.phone}
@@ -154,7 +136,7 @@ export default function Home() {
           <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0 mt-0.5" />
           <span>
             Deterministic HITL guarantee: the agent never commits to financial or policy
-            changes without your explicit screen tap. TypeSafe / Jev decision router · Keigo-trained voice proxy.
+            changes without your explicit screen tap. TypeSafe / Jev decision router · Keigo-trained voice proxy.<br /><span className="text-zinc-600">Built for the Side Quest Hotline Vapi Hackathon @ Vapi HQ · Deepgram · Fish Audio · TypeSafe/Jev · gpt-5-mini · LiveKit Cloud · Vercel</span>
           </span>
         </div>
       </div>
